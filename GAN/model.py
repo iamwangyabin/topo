@@ -83,17 +83,10 @@ print(netG)
 print(netD)
 
 use_cuda = torch.cuda.is_available()
-if use_cuda:
-    gpu = 0
-if use_cuda:
-    netD = netD.cuda(gpu)
-    netG = netG.cuda(gpu)
 
 one = torch.FloatTensor([1])
 mone = one * -1
-if use_cuda:
-    one = one.cuda(gpu)
-    mone = mone.cuda(gpu)
+
 
 optimizerD = optim.Adam(netD.parameters(), lr=1e-4, betas=(0.5, 0.9))
 optimizerG = optim.Adam(netG.parameters(), lr=1e-4, betas=(0.5, 0.9))
@@ -121,17 +114,6 @@ def calc_gradient_penalty(netD, real_data, fake_data):
     gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean() * LAMBDA
     return gradient_penalty
 
-# For generating samples
-def generate_image(netG):
-    fixed_noise_128 = torch.randn(128, 128)
-    if use_cuda:
-        fixed_noise_128 = fixed_noise_128.cuda(gpu)
-    noisev = autograd.Variable(fixed_noise_128, volatile=True)
-    samples = netG(noisev)
-    samples = samples.view(-1, 3, 32, 32)
-    samples = samples.mul(0.5).add(0.5)
-    samples = samples.cpu().data.numpy()
-    return samples
 
 # For calculating inception score
 def get_inception_score(G, ):
@@ -149,7 +131,7 @@ def get_inception_score(G, ):
     return lib.inception_score.get_inception_score(list(all_samples))
 
 # Dataset iterator
-train_gen, dev_gen = lib.cifar10.load(BATCH_SIZE, data_dir=DATA_DIR)
+rain_gen, dev_gen = lib.cifar10.load(BATCH_SIZE, data_dir=DATA_DIR)
 def inf_train_gen():
     while True:
         for images, target in train_gen():
@@ -225,12 +207,6 @@ for iteration in xrange(ITERS):
     G.backward(mone)
     G_cost = -G
     optimizerG.step()
-
-    # Write logs and save samples
-    lib.plot.plot('./tmp/cifar10/train disc cost', D_cost.cpu().data.numpy())
-    lib.plot.plot('./tmp/cifar10/time', time.time() - start_time)
-    lib.plot.plot('./tmp/cifar10/train gen cost', G_cost.cpu().data.numpy())
-    lib.plot.plot('./tmp/cifar10/wasserstein distance', Wasserstein_D.cpu().data.numpy())
 
     # Calculate inception score every 1K iters
     if False and iteration % 1000 == 999:
