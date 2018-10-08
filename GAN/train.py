@@ -2,17 +2,15 @@ import tqdm
 import torch as t
 from torch.autograd import Variable
 import torchvision as tv
-import matplotlib.pyplot as plt
 import GAN.mymodel
 import GAN.config
 import os
 from torchnet.meter import AverageValueMeter
-import ipdb
 
 opt=GAN.config.Config()
-if opt.vis:
-    from GAN.visualize import Visualizer
-    vis = Visualizer(opt.env)
+# if opt.vis:
+#     from GAN.visualize import Visualizer
+#     vis = Visualizer(opt.env)
 
 netg=GAN.mymodel.Generator()
 netd=GAN.mymodel.Discriminator()
@@ -67,15 +65,11 @@ for epoch in iter(epochs):
             optimizer_g.step()
         if opt.vis and ii % opt.plot_every == opt.plot_every - 1:
             ## 可视化
-            if os.path.exists(opt.debug_file):
-                ipdb.set_trace()
             fix_fake_imgs = netg(fix_noises)
-            vis.images(fix_fake_imgs.detach().cpu().numpy()[:64] * 0.5 + 0.5, win='fixfake')
-            vis.images(real_img.data.cpu().numpy()[:64] * 0.5 + 0.5, win='real')
-            vis.plot('errord', errord_meter.value()[0])
-            vis.plot('errorg', errorg_meter.value()[0])
+
     if (epoch+1) % opt.save_every == 0:
         # 保存模型、图片
+        fix_fake_imgs = netg(fix_noises)
         tv.utils.save_image(fix_fake_imgs.data[:64], '%s/%s.png' % (opt.save_path, epoch), normalize=True,
                                 range=(-1, 1))
         t.save(netd.state_dict(), 'checkpoints/netd_%s.pth' % epoch)

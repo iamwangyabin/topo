@@ -5,8 +5,6 @@ import torch
 from torch import nn
 from torch import autograd
 
-import matplotlib.pyplot as plt
-
 DIM = 64
 
 class Generator(nn.Module):
@@ -17,7 +15,7 @@ class Generator(nn.Module):
             nn.BatchNorm1d(4 * 4 * 4 * DIM),
             nn.ReLU(True),
         )
-
+        #input 256*4*4
         block1 = nn.Sequential(
             nn.ConvTranspose2d(4 * DIM, 2 * DIM, 2, stride=2),
             nn.BatchNorm2d(2 * DIM),
@@ -76,5 +74,5 @@ def generate_image(netG):
     return samples
 
 
-plt.figure("beauty")
-plt.imshow(samples)
+#plt.figure("beauty")
+#plt.imshow(samples)
