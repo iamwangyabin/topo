@@ -21,9 +21,9 @@ transform = tv.transforms.Compose([tv.transforms.Resize((60, 180)),
                                     tv.transforms.ToTensor(),
                                    ])
 
-path='/home/wang/桌面/top/testData/'
+path='/home/wang/topo/trainData/'
 dataset = CNN.dataloader.myDataset(path, transform, default_loader)
-data_loader = t.utils.data.DataLoader(dataset, batch_size=50, shuffle=False, num_workers=3)
+data_loader = t.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=False, num_workers=3)
 
 
 # transforms = tv.transforms.Compose([
@@ -46,15 +46,20 @@ optimizer_d = t.optim.Adam(netd.parameters(), opt.lr2, betas=(opt.beta1, 0.999))
 criterion = t.nn.BCELoss()
 true_labels = t.ones(opt.batch_size)
 fake_labels = t.zeros(opt.batch_size)
+
 fix_noises = t.randn(opt.batch_size, opt.nz)
+fix_noises = t.autograd.Variable(fix_noises, volatile=True)
+
 noises = t.randn(opt.batch_size, opt.nz)
+noises = t.autograd.Variable(noises, volatile=True)
+
 errord_meter = AverageValueMeter()
 errorg_meter = AverageValueMeter()
 
 epochs = range(opt.max_epoch)
 for epoch in iter(epochs):
-    for ii , (img,_) in tqdm.tqdm(enumerate(dataloader)):
-        real_img = Variable(img)
+    for ii,(image, label, k, j, l) in tqdm.tqdm(enumerate(data_loader)):
+        real_img = Variable(image)
         if (ii + 1) % opt.d_every == 0:
             optimizer_d.zero_grad()
             output = netd(real_img)
@@ -77,7 +82,6 @@ for epoch in iter(epochs):
         if opt.vis and ii % opt.plot_every == opt.plot_every - 1:
             ## 可视化
             fix_fake_imgs = netg(fix_noises)
-
     if (epoch+1) % opt.save_every == 0:
         # 保存模型、图片
         fix_fake_imgs = netg(fix_noises)

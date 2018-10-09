@@ -64,11 +64,12 @@ class Discriminator(nn.Module):
 
         self.main = main
         self.linear = nn.Linear(8*23*4*DIM, 1)
-
+        self.soft = nn.Softmax()
     def forward(self, input):
         output = self.main(input)
         output = output.view(-1, 8*23*4*DIM)
         output = self.linear(output)
+        output = self.soft(output)
         return output
 
 def generate_image(netG):

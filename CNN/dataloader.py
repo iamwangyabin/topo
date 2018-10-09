@@ -13,8 +13,8 @@ transform = torchvision.transforms.Compose([torchvision.transforms.Resize((60, 1
                                             #torchvision.transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
                                             ])
 
-#path='/home/wang/桌面/top/testData/'
-path='/home/wang/桌面/top/testData2/'
+# path='/home/wang/桌面/top/testData/'
+# path='/home/wang/桌面/top/testData2/'
 
 class myDataset(torch.utils.data.Dataset):
     def __init__(self, path, transform, loader=default_loader):
@@ -40,11 +40,11 @@ class myDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return self.len
-
-
-dataset = myDataset(path, transform, default_loader)
-data_loader = torch.utils.data.DataLoader(dataset, batch_size=50, shuffle=False, num_workers=3)
-
+#
+#
+# dataset = myDataset(path, transform, default_loader)
+# data_loader = torch.utils.data.DataLoader(dataset, batch_size=50, shuffle=False, num_workers=3)
+#
 
 def show():
     to_pil_image = torchvision.transforms.ToPILImage()
@@ -56,10 +56,10 @@ def show():
         img = to_pil_image(image[0])
         plt.imshow(img)
         cnt += 1
-
-for image, label, k, j, l in data_loader:
-    if cnt>=1:      # 只显示3张图片
-        break
-    print(label)    # 显示label
-    print(model(image))
-    cnt += 1
+#
+# for image, label, k, j, l in data_loader:
+#     if cnt>=1:      # 只显示3张图片
+#         break
+#     print(label)    # 显示label
+#     print(model(image))
+#     cnt += 1
