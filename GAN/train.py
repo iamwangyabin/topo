@@ -6,29 +6,40 @@ import GAN.mymodel
 import GAN.config
 import os
 from torchnet.meter import AverageValueMeter
+import CNN.dataloader
+from PIL import Image
 
 opt=GAN.config.Config()
-# if opt.vis:
-#     from GAN.visualize import Visualizer
-#     vis = Visualizer(opt.env)
 
 netg=GAN.mymodel.Generator()
 netd=GAN.mymodel.Discriminator()
 
-transforms = tv.transforms.Compose([
-    tv.transforms.Resize(opt.image_size),
-    tv.transforms.CenterCrop(opt.image_size),
-    tv.transforms.ToTensor(),
-    tv.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-])
+def default_loader(path):
+    return Image.open(path)
 
-dataset = tv.datasets.ImageFolder(opt.data_path, transform=transforms)
-dataloader = t.utils.data.DataLoader(dataset,
-                                     batch_size=opt.batch_size,
-                                     shuffle=True,
-                                     num_workers=opt.num_workers,
-                                     drop_last=True
-                                     )
+transform = tv.transforms.Compose([tv.transforms.Resize((60, 180)),
+                                    tv.transforms.ToTensor(),
+                                   ])
+
+path='/home/wang/桌面/top/testData/'
+dataset = CNN.dataloader.myDataset(path, transform, default_loader)
+data_loader = t.utils.data.DataLoader(dataset, batch_size=50, shuffle=False, num_workers=3)
+
+
+# transforms = tv.transforms.Compose([
+#     tv.transforms.Resize(opt.image_size),
+#     tv.transforms.CenterCrop(opt.image_size),
+#     tv.transforms.ToTensor(),
+#     tv.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+# ])
+#
+# dataset = tv.datasets.ImageFolder(opt.data_path, transform=transforms)
+# dataloader = t.utils.data.DataLoader(dataset,
+#                                      batch_size=opt.batch_size,
+#                                      shuffle=True,
+#                                      num_workers=opt.num_workers,
+#                                      drop_last=True
+#                                      )
 
 optimizer_g = t.optim.Adam(netg.parameters(), opt.lr1, betas=(opt.beta1, 0.999))
 optimizer_d = t.optim.Adam(netd.parameters(), opt.lr2, betas=(opt.beta1, 0.999))

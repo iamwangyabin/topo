@@ -11,8 +11,8 @@ class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
         preprocess = nn.Sequential(
-            nn.Linear(128, 4 * 4 * 4 * DIM),
-            nn.BatchNorm1d(4 * 4 * 4 * DIM),
+            nn.Linear(128, 3 * 4 * 4 * DIM),
+            nn.BatchNorm1d(3 * 4 * 4 * DIM),
             nn.ReLU(True),
         )
         #input 256*4*4
@@ -22,26 +22,33 @@ class Generator(nn.Module):
             nn.ReLU(True),
         )
         block2 = nn.Sequential(
-            nn.ConvTranspose2d(2 * DIM, DIM, 2, stride=2),
+            nn.ConvTranspose2d(2 * DIM, DIM, 5, stride=5),
             nn.BatchNorm2d(DIM),
             nn.ReLU(True),
         )
-        deconv_out = nn.ConvTranspose2d(DIM, 1, 2, stride=2)
+        block3 = nn.Sequential(
+            nn.ConvTranspose2d(DIM, DIM, 3, stride=3),
+            nn.BatchNorm2d(DIM),
+            nn.ReLU(True),
+        )
+        deconv_out = nn.ConvTranspose2d(DIM, 1, 1, stride=1,padding=0)
 
         self.preprocess = preprocess
         self.block1 = block1
         self.block2 = block2
+        self.block3 = block3
         self.deconv_out = deconv_out
         self.tanh = nn.Tanh()
 
     def forward(self, input):
         output = self.preprocess(input)
-        output = output.view(-1, 4 * DIM, 4, 4)
+        output = output.view(-1, 4 * DIM, 2, 6)
         output = self.block1(output)
         output = self.block2(output)
+        output = self.block3(output)
         output = self.deconv_out(output)
         output = self.tanh(output)
-        return output.view(-1, 1, 32, 32)
+        return output.view(-1, 1, 60, 180)
 
 class Discriminator(nn.Module):
     def __init__(self):
@@ -56,11 +63,11 @@ class Discriminator(nn.Module):
         )
 
         self.main = main
-        self.linear = nn.Linear(4*4*4*DIM, 1)
+        self.linear = nn.Linear(8*23*4*DIM, 1)
 
     def forward(self, input):
         output = self.main(input)
-        output = output.view(-1, 4*4*4*DIM)
+        output = output.view(-1, 8*23*4*DIM)
         output = self.linear(output)
         return output
 
