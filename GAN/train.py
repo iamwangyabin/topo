@@ -1,3 +1,6 @@
+import os, sys
+sys.path.append(os.getcwd())
+
 import tqdm
 import torch as t
 from torch.autograd import Variable
